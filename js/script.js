@@ -1,165 +1,145 @@
-// js/script.js - Versão com Pausa, Sons e Lógica Aprimorada
+// js/cartas.js
 
-// =========================================================================
-// PONTO DE ENTRADA DA APLICAÇÃO
-// =========================================================================
-window.addEventListener('DOMContentLoaded', () => {
-    setupEventListeners();
-});
 
-// =========================================================================
-// CONFIGURAÇÃO DOS EVENTOS
-// =========================================================================
-function setupEventListeners() {
-    document.getElementById('btn-jogar').addEventListener('click', iniciarJogo);
-    document.getElementById('btn-pausar').addEventListener('click', togglePause);
-    document.getElementById('btn-proxima-rodada').addEventListener('click', sortearCartas);
-}
 
-// =========================================================================
-// ESTADO E LÓGICA DO JOGO (GAME STATE & LOGIC)
-// =========================================================================
-let monteJogador = [];
-let monteMaquina = [];
-let cartaJogador;
-let cartaMaquina;
-let jogoPausado = false; // Novo estado para controlar a pausa
+// Usamos const para garantir que nosso baralho não seja alterado acidentalmente.
 
-// Funções de som
-const somVitoria = document.getElementById('sound-win');
-const somDerrota = document.getElementById('sound-lose');
+const baralho = [
 
-function tocarSom(som) {
-    som.currentTime = 0; // Reinicia o som para o início
-    som.play();
-}
+    {
 
-function togglePause() {
-    jogoPausado = !jogoPausado; // Inverte o estado de pausa
-    const overlay = document.getElementById('pause-overlay');
-    const btnPausar = document.getElementById('btn-pausar');
+        nome: 'Google',
 
-    if (jogoPausado) {
-        overlay.classList.remove('hidden');
-        btnPausar.textContent = 'Retomar';
-    } else {
-        overlay.classList.add('hidden');
-        btnPausar.textContent = 'Pausar';
-    }
-}
+        imagem: 'https://logospng.org/download/google/logo-google-4096.png',
 
-function iniciarJogo() {
-    const btnJogar = document.getElementById('btn-jogar');
-    const btnPausar = document.getElementById('btn-pausar');
-    const btnProximaRodada = document.getElementById('btn-proxima-rodada');
+        atributos: {
 
-    let baralhoEmbaralhado = [...baralho].sort(() => Math.random() - 0.5);
+            'Usuários (em bilhões)': 4.3,
 
-    const metade = Math.ceil(baralhoEmbaralhado.length / 2);
-    monteJogador = baralhoEmbaralhado.slice(0, metade);
-    monteMaquina = baralhoEmbaralhado.slice(metade);
+            'Inovação (0-10)': 9,
 
-    btnJogar.disabled = true;
-    btnPausar.disabled = false; // Habilita o botão de pausar
-    btnProximaRodada.disabled = false;
+            'Receita (em bilhões $)': 282
 
-    sortearCartas();
-    atualizarPlacar();
-}
-
-function atualizarPlacar() {
-    document.getElementById('placar-jogador').textContent = `Jogador: ${monteJogador.length}`;
-    document.getElementById('placar-maquina').textContent = `Máquina: ${monteMaquina.length}`;
-}
-
-function sortearCartas() {
-    if (jogoPausado) return; // Não faz nada se o jogo estiver pausado
-
-    if (monteJogador.length === 0 || monteMaquina.length === 0) {
-        fimDeJogo();
-        return;
-    }
-
-    cartaJogador = monteJogador[0];
-    cartaMaquina = monteMaquina[0];
-
-    document.getElementById('resultado').textContent = "Escolha um atributo";
-    document.getElementById('btn-proxima-rodada').disabled = true;
-
-    exibirCarta(document.getElementById('carta-jogador'), cartaJogador, true);
-
-    const cartaMaquinaEl = document.getElementById('carta-maquina');
-    cartaMaquinaEl.innerHTML = "";
-    cartaMaquinaEl.classList.add('verso');
-}
-
-function exibirCarta(elemento, carta, ehJogador) {
-    elemento.classList.remove('verso');
-    let html = `<div class="carta-nome">${carta.nome}</div>`;
-    html += `<img src="${carta.imagem}" class="carta-imagem">`;
-    html += '<div class="carta-atributos"><ul>';
-
-    for (let atributo in carta.atributos) {
-        // Apenas adiciona o evento de clique se for o jogador e o jogo não estiver pausado
-        if (ehJogador) {
-            html += `<li onclick="comparar('${atributo}')">${atributo}: ${carta.atributos[atributo]}</li>`;
-        } else {
-            html += `<li>${atributo}: ${carta.atributos[atributo]}</li>`;
         }
-    }
 
-    html += '</ul></div>';
-    elemento.innerHTML = html;
-}
+    },
 
-function comparar(atributoSelecionado) {
-    if (jogoPausado) return; // Bloqueia a ação se o jogo estiver pausado
+    {
 
-    const resultadoEl = document.getElementById('resultado');
-    const btnProximaRodada = document.getElementById('btn-proxima-rodada');
+        nome: 'Apple',
 
-    exibirCarta(document.getElementById('carta-maquina'), cartaMaquina, false);
+        imagem: 'https://logospng.org/download/apple/logo-apple-4096.png',
 
-    let valorJogador = cartaJogador.atributos[atributoSelecionado];
-    let valorMaquina = cartaMaquina.atributos[atributoSelecionado];
+        atributos: {
 
-    if (valorJogador > valorMaquina) {
-        resultadoEl.textContent = `Você venceu! ${valorJogador} > ${valorMaquina}`;
-        tocarSom(somVitoria);
-        monteJogador.push(monteMaquina.shift());
-        monteJogador.push(monteJogador.shift());
-    } else if (valorMaquina > valorJogador) {
-        resultadoEl.textContent = `Você perdeu! ${valorJogador} < ${valorMaquina}`;
-        tocarSom(somDerrota);
-        monteMaquina.push(monteJogador.shift());
-        monteMaquina.push(monteMaquina.shift());
-    } else {
-        resultadoEl.textContent = "Empate!";
-        monteJogador.push(monteJogador.shift());
-        monteMaquina.push(monteMaquina.shift());
-    }
+            'Usuários (em bilhões)': 1.8,
 
-    atualizarPlacar();
-    btnProximaRodada.disabled = false;
+            'Inovação (0-10)': 10,
 
-    // Remove o onclick dos atributos para evitar jogada dupla
-    const atributosLi = document.getElementById('carta-jogador').querySelectorAll('.carta-atributos li');
-    atributosLi.forEach(li => li.onclick = null);
-}
+            'Receita (em bilhões $)': 394
 
-function fimDeJogo() {
-    const btnJogar = document.getElementById('btn-jogar');
-    const btnPausar = document.getElementById('btn-pausar');
-    const btnProximaRodada = document.getElementById('btn-proxima-rodada');
+        }
 
-    const mensagemFinal = monteJogador.length > 0 ? "Fim de jogo! Parabéns, você venceu!" : "Fim de jogo! Você perdeu.";
-    document.getElementById('resultado').textContent = mensagemFinal;
+    },
 
-    btnProximaRodada.disabled = true;
-    btnPausar.disabled = true;
-    btnJogar.disabled = false;
-    btnJogar.textContent = "Jogar Novamente";
-    // Remove o listener antigo para evitar múltiplos inícios
-    btnJogar.replaceWith(btnJogar.cloneNode(true));
-    document.getElementById('btn-jogar').addEventListener('click', () => window.location.reload());
-}
+    {
+
+        nome: 'Microsoft',
+
+        imagem: 'https://logospng.org/download/microsoft/logo-microsoft-4096.png',
+
+        atributos: {
+
+            'Usuários (em bilhões)': 1.4,
+
+            'Inovação (0-10)': 8,
+
+            'Receita (em bilhões $)': 211
+
+        }
+
+    },
+
+    {
+
+        nome: 'Amazon',
+
+        imagem: 'https://logospng.org/download/amazon/logo-amazon-4096.png',
+
+        atributos: {
+
+            'Usuários (em bilhões)': 2.2,
+
+            'Inovação (0-10)': 9,
+
+            'Receita (em bilhões $)': 514
+
+        }
+
+    },
+
+    // Dica: Peça para os alunos adicionarem mais 4 ou 6 cartas para o jogo ficar mais interessante!
+
+    {
+
+        nome: 'Meta (Facebook)',
+
+        imagem: 'https://logospng.org/download/meta-platforms-inc/meta-platforms-inc-4096.png',
+
+        atributos: {
+
+            'Usuários (em bilhões)': 3.7,
+
+            'Inovação (0-10)': 7,
+
+            'Receita (em bilhões $)': 116
+
+        }
+
+    },
+
+    {
+
+        nome: 'Netflix',
+
+        imagem: 'https://logospng.org/download/netflix/logo-netflix-4096.png',
+
+        atributos: {
+
+            'Usuários (em bilhões)': 0.23,
+
+            'Inovação (0-10)': 8,
+
+            'Receita (em bilhões $)': 31
+
+        }
+
+    },
+
+    // 12 Novas Cartas
+
+    { nome: 'NVIDIA', imagem: 'https://logospng.org/download/nvidia/nvidia-4096.png', atributos: { 'Usuários (em bilhões)': 0.3, 'Inovação (0-10)': 10, 'Receita (em bilhões $)': 60 } },
+
+    { nome: 'Tesla', imagem: 'https://logospng.org/download/tesla/logo-tesla-1024.png', atributos: { 'Usuários (em bilhões)': 0.05, 'Inovação (0-10)': 10, 'Receita (em bilhões $)': 81 } },
+
+    { nome: 'Samsung', imagem: 'https://logospng.org/download/samsung/logo-samsung-4096.png', atributos: { 'Usuários (em bilhões)': 2.0, 'Inovação (0-10)': 8, 'Receita (em bilhões $)': 234 } },
+
+    { nome: 'Tencent', imagem: 'https://logospng.org/download/tencent/tencent-4096.png', atributos: { 'Usuários (em bilhões)': 1.5, 'Inovação (0-10)': 7, 'Receita (em bilhões $)': 82 } },
+
+    { nome: 'Oracle', imagem: 'https://logospng.org/download/oracle/oracle-4096.png', atributos: { 'Usuários (em bilhões)': 0.4, 'Inovação (0-10)': 6, 'Receita (em bilhões $)': 50 } },
+
+    { nome: 'Adobe', imagem: 'https://logospng.org/download/adobe/adobe-4096.png', atributos: { 'Usuários (em bilhões)': 0.25, 'Inovação (0-10)': 9, 'Receita (em bilhões $)': 17 } },
+
+    { nome: 'Intel', imagem: 'https://logospng.org/download/intel/logo-intel-1024.png', atributos: { 'Usuários (em bilhões)': 1.0, 'Inovação (0-10)': 7, 'Receita (em bilhões $)': 63 } },
+
+    { nome: 'IBM', imagem: 'https://logospng.org/download/ibm/logo-ibm-2048.png', atributos: { 'Usuários (em bilhões)': 0.5, 'Inovação (0-10)': 8, 'Receita (em bilhões $)': 60 } },
+
+    { nome: 'SAP', imagem: 'https://logospng.org/download/sap/sap-4096.png', atributos: { 'Usuários (em bilhões)': 0.45, 'Inovação (0-10)': 6, 'Receita (em bilhões $)': 32 } },
+
+    { nome: 'Salesforce', imagem: 'https://logospng.org/download/salesforce/salesforce-4096.png', atributos: { 'Usuários (em bilhões)': 0.15, 'Inovação (0-10)': 8, 'Receita (em bilhões $)': 31 } },
+
+    { nome: 'Spotify', imagem: 'https://logospng.org/download/spotify/logo-spotify-4096.png', atributos: { 'Usuários (em bilhões)': 0.5, 'Inovação (0-10)': 7, 'Receita (em bilhões $)': 11 } },
+
+    { nome: 'AMD', imagem: 'https://logospng.org/download/amd/logo-amd-1024.png', atributos: { 'Usuários (em bilhões)': 0.8, 'Inovação (0-10)': 9, 'Receita (em bilhões $)': 22 } }
+
+];
