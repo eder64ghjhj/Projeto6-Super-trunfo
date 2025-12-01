@@ -1,1 +1,2 @@
-# Projeto6-Super-trunfo
+# Projeto_06_Super_Trunfo
+Super Trunfo
